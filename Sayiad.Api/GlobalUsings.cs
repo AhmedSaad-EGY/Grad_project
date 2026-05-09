@@ -1,0 +1,9 @@
+global using Microsoft.EntityFrameworkCore;
+global using Sayiad.Data;
+global using Sayiad.Domain.Models;
+global using Sayiad.Domain.Enums;
+global using Sayiad.Domain.Contracts;
+global using Sayiad.Data.Repositories;
+global using Sayiad.Domain.Common;
+global using Sayiad.Domain.Managers;
+global using Sayiad.Api.Services.Token;
