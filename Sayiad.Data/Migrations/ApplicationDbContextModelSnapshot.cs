@@ -22,7 +22,7 @@ namespace Sayiad.Data.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("Sayiad.Data.Models.Auction", b =>
+            modelBuilder.Entity("Sayiad.Domain.Models.Auction", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -34,6 +34,9 @@ namespace Sayiad.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
                         .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<int>("CreatedByUserId")
+                        .HasColumnType("int");
 
                     b.Property<decimal>("CurrentHighestBid")
                         .HasPrecision(18, 2)
@@ -75,14 +78,16 @@ namespace Sayiad.Data.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CreatedByUserId");
+
                     b.HasIndex("ProductId");
 
                     b.HasIndex("WinnerUserId");
 
-                    b.ToTable("Auctions", (string)null);
+                    b.ToTable("Auctions");
                 });
 
-            modelBuilder.Entity("Sayiad.Data.Models.Bid", b =>
+            modelBuilder.Entity("Sayiad.Domain.Models.Bid", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -120,10 +125,10 @@ namespace Sayiad.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Bids", (string)null);
+                    b.ToTable("Bids");
                 });
 
-            modelBuilder.Entity("Sayiad.Data.Models.Cart", b =>
+            modelBuilder.Entity("Sayiad.Domain.Models.Cart", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -149,10 +154,10 @@ namespace Sayiad.Data.Migrations
                     b.HasIndex("UserId")
                         .IsUnique();
 
-                    b.ToTable("Carts", (string)null);
+                    b.ToTable("Carts");
                 });
 
-            modelBuilder.Entity("Sayiad.Data.Models.CartItem", b =>
+            modelBuilder.Entity("Sayiad.Domain.Models.CartItem", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -180,10 +185,10 @@ namespace Sayiad.Data.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("CartItems", (string)null);
+                    b.ToTable("CartItems");
                 });
 
-            modelBuilder.Entity("Sayiad.Data.Models.Category", b =>
+            modelBuilder.Entity("Sayiad.Domain.Models.Category", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -206,10 +211,10 @@ namespace Sayiad.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Categories", (string)null);
+                    b.ToTable("Categories");
                 });
 
-            modelBuilder.Entity("Sayiad.Data.Models.CustomerOrder", b =>
+            modelBuilder.Entity("Sayiad.Domain.Models.CustomerOrder", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -224,6 +229,9 @@ namespace Sayiad.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
                         .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<int>("ShippingAddressId")
+                        .HasColumnType("int");
 
                     b.Property<int>("Status")
                         .HasMaxLength(20)
@@ -242,10 +250,12 @@ namespace Sayiad.Data.Migrations
 
                     b.HasIndex("BuyerId");
 
-                    b.ToTable("CustomerOrders", (string)null);
+                    b.HasIndex("ShippingAddressId");
+
+                    b.ToTable("CustomerOrders");
                 });
 
-            modelBuilder.Entity("Sayiad.Data.Models.Notification", b =>
+            modelBuilder.Entity("Sayiad.Domain.Models.Notification", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -280,10 +290,10 @@ namespace Sayiad.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Notifications", (string)null);
+                    b.ToTable("Notifications");
                 });
 
-            modelBuilder.Entity("Sayiad.Data.Models.OrderItem", b =>
+            modelBuilder.Entity("Sayiad.Domain.Models.OrderItem", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -324,10 +334,10 @@ namespace Sayiad.Data.Migrations
 
                     b.HasIndex("SellerId");
 
-                    b.ToTable("OrderItems", (string)null);
+                    b.ToTable("OrderItems");
                 });
 
-            modelBuilder.Entity("Sayiad.Data.Models.Payment", b =>
+            modelBuilder.Entity("Sayiad.Domain.Models.Payment", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -364,10 +374,10 @@ namespace Sayiad.Data.Migrations
 
                     b.HasIndex("OrderId");
 
-                    b.ToTable("Payments", (string)null);
+                    b.ToTable("Payments");
                 });
 
-            modelBuilder.Entity("Sayiad.Data.Models.Product", b =>
+            modelBuilder.Entity("Sayiad.Domain.Models.Product", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -437,10 +447,10 @@ namespace Sayiad.Data.Migrations
 
                     b.HasIndex("SellerId");
 
-                    b.ToTable("Products", (string)null);
+                    b.ToTable("Products");
                 });
 
-            modelBuilder.Entity("Sayiad.Data.Models.ProductImage", b =>
+            modelBuilder.Entity("Sayiad.Domain.Models.ProductImage", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -469,10 +479,10 @@ namespace Sayiad.Data.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("ProductImages", (string)null);
+                    b.ToTable("ProductImages");
                 });
 
-            modelBuilder.Entity("Sayiad.Data.Models.Report", b =>
+            modelBuilder.Entity("Sayiad.Domain.Models.Report", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -507,10 +517,10 @@ namespace Sayiad.Data.Migrations
 
                     b.HasIndex("ReporterId");
 
-                    b.ToTable("Reports", (string)null);
+                    b.ToTable("Reports");
                 });
 
-            modelBuilder.Entity("Sayiad.Data.Models.Review", b =>
+            modelBuilder.Entity("Sayiad.Domain.Models.Review", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -542,10 +552,10 @@ namespace Sayiad.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Reviews", (string)null);
+                    b.ToTable("Reviews");
                 });
 
-            modelBuilder.Entity("Sayiad.Data.Models.SellerProfile", b =>
+            modelBuilder.Entity("Sayiad.Domain.Models.SellerProfile", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -586,10 +596,10 @@ namespace Sayiad.Data.Migrations
                     b.HasIndex("UserId")
                         .IsUnique();
 
-                    b.ToTable("SellerProfiles", (string)null);
+                    b.ToTable("SellerProfiles");
                 });
 
-            modelBuilder.Entity("Sayiad.Data.Models.ShippingAddress", b =>
+            modelBuilder.Entity("Sayiad.Domain.Models.ShippingAddress", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -639,10 +649,10 @@ namespace Sayiad.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("ShippingAddresses", (string)null);
+                    b.ToTable("ShippingAddresses");
                 });
 
-            modelBuilder.Entity("Sayiad.Data.Models.Transaction", b =>
+            modelBuilder.Entity("Sayiad.Domain.Models.Transaction", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -676,10 +686,10 @@ namespace Sayiad.Data.Migrations
 
                     b.HasIndex("PaymentId");
 
-                    b.ToTable("Transactions", (string)null);
+                    b.ToTable("Transactions");
                 });
 
-            modelBuilder.Entity("Sayiad.Data.Models.User", b =>
+            modelBuilder.Entity("Sayiad.Domain.Models.User", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -737,10 +747,10 @@ namespace Sayiad.Data.Migrations
                     b.HasIndex("Email")
                         .IsUnique();
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("Sayiad.Data.Models.Wishlist", b =>
+            modelBuilder.Entity("Sayiad.Domain.Models.Wishlist", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -765,36 +775,44 @@ namespace Sayiad.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Wishlists", (string)null);
+                    b.ToTable("Wishlists");
                 });
 
-            modelBuilder.Entity("Sayiad.Data.Models.Auction", b =>
+            modelBuilder.Entity("Sayiad.Domain.Models.Auction", b =>
                 {
-                    b.HasOne("Sayiad.Data.Models.Product", "Product")
+                    b.HasOne("Sayiad.Domain.Models.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Sayiad.Domain.Models.Product", "Product")
                         .WithMany("Auctions")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Sayiad.Data.Models.User", "Winner")
+                    b.HasOne("Sayiad.Domain.Models.User", "Winner")
                         .WithMany("WonAuctions")
                         .HasForeignKey("WinnerUserId")
                         .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("CreatedByUser");
 
                     b.Navigation("Product");
 
                     b.Navigation("Winner");
                 });
 
-            modelBuilder.Entity("Sayiad.Data.Models.Bid", b =>
+            modelBuilder.Entity("Sayiad.Domain.Models.Bid", b =>
                 {
-                    b.HasOne("Sayiad.Data.Models.Auction", "Auction")
+                    b.HasOne("Sayiad.Domain.Models.Auction", "Auction")
                         .WithMany("Bids")
                         .HasForeignKey("AuctionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Sayiad.Data.Models.User", "User")
+                    b.HasOne("Sayiad.Domain.Models.User", "User")
                         .WithMany("Bids")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -805,26 +823,26 @@ namespace Sayiad.Data.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Sayiad.Data.Models.Cart", b =>
+            modelBuilder.Entity("Sayiad.Domain.Models.Cart", b =>
                 {
-                    b.HasOne("Sayiad.Data.Models.User", "User")
+                    b.HasOne("Sayiad.Domain.Models.User", "User")
                         .WithOne("Cart")
-                        .HasForeignKey("Sayiad.Data.Models.Cart", "UserId")
+                        .HasForeignKey("Sayiad.Domain.Models.Cart", "UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Sayiad.Data.Models.CartItem", b =>
+            modelBuilder.Entity("Sayiad.Domain.Models.CartItem", b =>
                 {
-                    b.HasOne("Sayiad.Data.Models.Cart", "Cart")
+                    b.HasOne("Sayiad.Domain.Models.Cart", "Cart")
                         .WithMany("CartItems")
                         .HasForeignKey("CartId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Sayiad.Data.Models.Product", "Product")
+                    b.HasOne("Sayiad.Domain.Models.Product", "Product")
                         .WithMany("CartItems")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -835,20 +853,28 @@ namespace Sayiad.Data.Migrations
                     b.Navigation("Product");
                 });
 
-            modelBuilder.Entity("Sayiad.Data.Models.CustomerOrder", b =>
+            modelBuilder.Entity("Sayiad.Domain.Models.CustomerOrder", b =>
                 {
-                    b.HasOne("Sayiad.Data.Models.User", "Buyer")
+                    b.HasOne("Sayiad.Domain.Models.User", "Buyer")
                         .WithMany("CustomerOrders")
                         .HasForeignKey("BuyerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Sayiad.Domain.Models.ShippingAddress", "ShippingAddress")
+                        .WithMany()
+                        .HasForeignKey("ShippingAddressId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.Navigation("Buyer");
+
+                    b.Navigation("ShippingAddress");
                 });
 
-            modelBuilder.Entity("Sayiad.Data.Models.Notification", b =>
+            modelBuilder.Entity("Sayiad.Domain.Models.Notification", b =>
                 {
-                    b.HasOne("Sayiad.Data.Models.User", "User")
+                    b.HasOne("Sayiad.Domain.Models.User", "User")
                         .WithMany("Notifications")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -857,21 +883,21 @@ namespace Sayiad.Data.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Sayiad.Data.Models.OrderItem", b =>
+            modelBuilder.Entity("Sayiad.Domain.Models.OrderItem", b =>
                 {
-                    b.HasOne("Sayiad.Data.Models.CustomerOrder", "Order")
+                    b.HasOne("Sayiad.Domain.Models.CustomerOrder", "Order")
                         .WithMany("OrderItems")
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Sayiad.Data.Models.Product", "Product")
+                    b.HasOne("Sayiad.Domain.Models.Product", "Product")
                         .WithMany("OrderItems")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Sayiad.Data.Models.User", "Seller")
+                    b.HasOne("Sayiad.Domain.Models.User", "Seller")
                         .WithMany("SoldOrderItems")
                         .HasForeignKey("SellerId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -884,9 +910,9 @@ namespace Sayiad.Data.Migrations
                     b.Navigation("Seller");
                 });
 
-            modelBuilder.Entity("Sayiad.Data.Models.Payment", b =>
+            modelBuilder.Entity("Sayiad.Domain.Models.Payment", b =>
                 {
-                    b.HasOne("Sayiad.Data.Models.CustomerOrder", "Order")
+                    b.HasOne("Sayiad.Domain.Models.CustomerOrder", "Order")
                         .WithMany("Payments")
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -895,15 +921,15 @@ namespace Sayiad.Data.Migrations
                     b.Navigation("Order");
                 });
 
-            modelBuilder.Entity("Sayiad.Data.Models.Product", b =>
+            modelBuilder.Entity("Sayiad.Domain.Models.Product", b =>
                 {
-                    b.HasOne("Sayiad.Data.Models.Category", "Category")
+                    b.HasOne("Sayiad.Domain.Models.Category", "Category")
                         .WithMany("Products")
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Sayiad.Data.Models.User", "Seller")
+                    b.HasOne("Sayiad.Domain.Models.User", "Seller")
                         .WithMany("Products")
                         .HasForeignKey("SellerId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -914,9 +940,9 @@ namespace Sayiad.Data.Migrations
                     b.Navigation("Seller");
                 });
 
-            modelBuilder.Entity("Sayiad.Data.Models.ProductImage", b =>
+            modelBuilder.Entity("Sayiad.Domain.Models.ProductImage", b =>
                 {
-                    b.HasOne("Sayiad.Data.Models.Product", "Product")
+                    b.HasOne("Sayiad.Domain.Models.Product", "Product")
                         .WithMany("Images")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -925,15 +951,15 @@ namespace Sayiad.Data.Migrations
                     b.Navigation("Product");
                 });
 
-            modelBuilder.Entity("Sayiad.Data.Models.Report", b =>
+            modelBuilder.Entity("Sayiad.Domain.Models.Report", b =>
                 {
-                    b.HasOne("Sayiad.Data.Models.Product", "Product")
+                    b.HasOne("Sayiad.Domain.Models.Product", "Product")
                         .WithMany("Reports")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Sayiad.Data.Models.User", "Reporter")
+                    b.HasOne("Sayiad.Domain.Models.User", "Reporter")
                         .WithMany("Reports")
                         .HasForeignKey("ReporterId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -944,15 +970,15 @@ namespace Sayiad.Data.Migrations
                     b.Navigation("Reporter");
                 });
 
-            modelBuilder.Entity("Sayiad.Data.Models.Review", b =>
+            modelBuilder.Entity("Sayiad.Domain.Models.Review", b =>
                 {
-                    b.HasOne("Sayiad.Data.Models.Product", "Product")
+                    b.HasOne("Sayiad.Domain.Models.Product", "Product")
                         .WithMany("Reviews")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Sayiad.Data.Models.User", "User")
+                    b.HasOne("Sayiad.Domain.Models.User", "User")
                         .WithMany("Reviews")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -963,20 +989,20 @@ namespace Sayiad.Data.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Sayiad.Data.Models.SellerProfile", b =>
+            modelBuilder.Entity("Sayiad.Domain.Models.SellerProfile", b =>
                 {
-                    b.HasOne("Sayiad.Data.Models.User", "User")
+                    b.HasOne("Sayiad.Domain.Models.User", "User")
                         .WithOne("SellerProfile")
-                        .HasForeignKey("Sayiad.Data.Models.SellerProfile", "UserId")
+                        .HasForeignKey("Sayiad.Domain.Models.SellerProfile", "UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Sayiad.Data.Models.ShippingAddress", b =>
+            modelBuilder.Entity("Sayiad.Domain.Models.ShippingAddress", b =>
                 {
-                    b.HasOne("Sayiad.Data.Models.User", "User")
+                    b.HasOne("Sayiad.Domain.Models.User", "User")
                         .WithMany("ShippingAddresses")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -985,9 +1011,9 @@ namespace Sayiad.Data.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Sayiad.Data.Models.Transaction", b =>
+            modelBuilder.Entity("Sayiad.Domain.Models.Transaction", b =>
                 {
-                    b.HasOne("Sayiad.Data.Models.Payment", "Payment")
+                    b.HasOne("Sayiad.Domain.Models.Payment", "Payment")
                         .WithMany("Transactions")
                         .HasForeignKey("PaymentId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -996,15 +1022,15 @@ namespace Sayiad.Data.Migrations
                     b.Navigation("Payment");
                 });
 
-            modelBuilder.Entity("Sayiad.Data.Models.Wishlist", b =>
+            modelBuilder.Entity("Sayiad.Domain.Models.Wishlist", b =>
                 {
-                    b.HasOne("Sayiad.Data.Models.Product", "Product")
+                    b.HasOne("Sayiad.Domain.Models.Product", "Product")
                         .WithMany("Wishlists")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Sayiad.Data.Models.User", "User")
+                    b.HasOne("Sayiad.Domain.Models.User", "User")
                         .WithMany("Wishlists")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1015,34 +1041,34 @@ namespace Sayiad.Data.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Sayiad.Data.Models.Auction", b =>
+            modelBuilder.Entity("Sayiad.Domain.Models.Auction", b =>
                 {
                     b.Navigation("Bids");
                 });
 
-            modelBuilder.Entity("Sayiad.Data.Models.Cart", b =>
+            modelBuilder.Entity("Sayiad.Domain.Models.Cart", b =>
                 {
                     b.Navigation("CartItems");
                 });
 
-            modelBuilder.Entity("Sayiad.Data.Models.Category", b =>
+            modelBuilder.Entity("Sayiad.Domain.Models.Category", b =>
                 {
                     b.Navigation("Products");
                 });
 
-            modelBuilder.Entity("Sayiad.Data.Models.CustomerOrder", b =>
+            modelBuilder.Entity("Sayiad.Domain.Models.CustomerOrder", b =>
                 {
                     b.Navigation("OrderItems");
 
                     b.Navigation("Payments");
                 });
 
-            modelBuilder.Entity("Sayiad.Data.Models.Payment", b =>
+            modelBuilder.Entity("Sayiad.Domain.Models.Payment", b =>
                 {
                     b.Navigation("Transactions");
                 });
 
-            modelBuilder.Entity("Sayiad.Data.Models.Product", b =>
+            modelBuilder.Entity("Sayiad.Domain.Models.Product", b =>
                 {
                     b.Navigation("Auctions");
 
@@ -1059,7 +1085,7 @@ namespace Sayiad.Data.Migrations
                     b.Navigation("Wishlists");
                 });
 
-            modelBuilder.Entity("Sayiad.Data.Models.User", b =>
+            modelBuilder.Entity("Sayiad.Domain.Models.User", b =>
                 {
                     b.Navigation("Bids");
 

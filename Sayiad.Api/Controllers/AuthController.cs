@@ -1,7 +1,6 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Sayiad.Domain.Contracts;
 using Sayiad.Domain.Dtos.AuthDtos;
 
 namespace Sayiad.Api.Controllers;
@@ -36,6 +35,15 @@ public class AuthController : ControllerBase
     {
         var result = await _authManager.RefreshTokenAsync(request.RefreshToken);
         return Ok(result);
+    }
+
+    [Authorize]
+    [HttpPost("logout")]
+    public async Task<IActionResult> Logout()
+    {
+        var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        await _authManager.LogoutAsync(userId);
+        return NoContent();
     }
 
     [Authorize]

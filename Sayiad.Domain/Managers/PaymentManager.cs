@@ -1,7 +1,4 @@
 using Microsoft.Extensions.Logging;
-using Sayiad.Domain.Contracts;
-using Sayiad.Domain.Enums;
-using Sayiad.Domain.Models;
 using Sayiad.Domain.Dtos.PaymentDtos;
 
 namespace Sayiad.Domain.Managers;
@@ -57,10 +54,13 @@ public class PaymentManager : IPaymentManager
         return MapToResponse(payment);
     }
 
-    public async Task<PaymentResponse> ConfirmAsync(int paymentId)
+    public async Task<PaymentResponse> ConfirmAsync(int paymentId, int userId)
     {
         var payment = await _paymentRepo.GetByIdAsync(paymentId)
             ?? throw new KeyNotFoundException("Payment not found");
+
+        if (payment.Order.BuyerId != userId)
+            throw new UnauthorizedAccessException("You cannot confirm another user's payment.");
 
         if (payment.PaymentStatus != "Pending")
             throw new InvalidOperationException("Payment is already processed");

@@ -1,7 +1,6 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Sayiad.Domain.Contracts;
 using Sayiad.Domain.Dtos.PaymentDtos;
 
 namespace Sayiad.Api.Controllers;
@@ -29,7 +28,8 @@ public class PaymentsController : ControllerBase
     [HttpPost("{paymentId}/confirm")]
     public async Task<IActionResult> Confirm(int paymentId)
     {
-        var result = await _paymentManager.ConfirmAsync(paymentId);
+        var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var result = await _paymentManager.ConfirmAsync(paymentId, userId);
         return Ok(result);
     }
 

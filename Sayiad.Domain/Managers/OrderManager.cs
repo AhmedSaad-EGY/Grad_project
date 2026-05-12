@@ -1,7 +1,5 @@
-using System.Transactions;
 using Microsoft.Extensions.Logging;
-using Sayiad.Domain.Contracts;
-using Sayiad.Domain.Enums;
+using Sayiad.Data.Common;
 using Sayiad.Domain.Dtos.OrderDtos;
 
 namespace Sayiad.Domain.Managers;
@@ -10,18 +8,21 @@ public class OrderManager : IOrderManager
 {
     private readonly IOrderRepository _orderRepo;
     private readonly ICartRepository _cartRepo;
-    private readonly IProductRepository _productRepo;
+    private readonly ISellerProfileRepository _sellerProfileRepo;
+    private readonly INotificationManager _notificationManager;
     private readonly ILogger<OrderManager> _logger;
 
     public OrderManager(
         IOrderRepository orderRepo,
         ICartRepository cartRepo,
-        IProductRepository productRepo,
+        ISellerProfileRepository sellerProfileRepo,
+        INotificationManager notificationManager,
         ILogger<OrderManager> logger)
     {
         _orderRepo = orderRepo;
         _cartRepo = cartRepo;
-        _productRepo = productRepo;
+        _sellerProfileRepo = sellerProfileRepo;
+        _notificationManager = notificationManager;
         _logger = logger;
     }
 
@@ -45,12 +46,11 @@ public class OrderManager : IOrderManager
         var order = new CustomerOrder
         {
             BuyerId = userId,
+            ShippingAddressId = request.ShippingAddressId,
             Status = CustomerOrderStatus.Pending,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
-
-        using var tx = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
 
         foreach (var cartItem in cart.CartItems)
         {
@@ -66,27 +66,28 @@ public class OrderManager : IOrderManager
                 Subtotal = subtotal,
                 CreatedAt = DateTime.UtcNow
             });
-
-            cartItem.Product.StockQuantity -= cartItem.Quantity;
-            if (cartItem.Product.StockQuantity == 0)
-                cartItem.Product.Status = ProductStatus.Sold;
-
-            await _productRepo.UpdateAsync(cartItem.Product);
         }
 
-        await _orderRepo.AddAsync(order);
-        await _cartRepo.ClearCartAsync(userId);
+        order = await _orderRepo.CreateOrderTransactionAsync(order, userId);
 
-        tx.Complete();
+        await _notificationManager.CreateAsync(userId, "Order Placed",
+            $"Your order #{order.Id} has been placed successfully.");
 
         _logger.LogInformation("Order created: {OrderId} by user {UserId}", order.Id, userId);
         return await GetByIdAsync(order.Id, userId);
     }
 
-    public async Task<IEnumerable<OrderResponse>> GetUserOrdersAsync(int userId)
+    public async Task<PagedResult<OrderResponse>> GetUserOrdersAsync(int userId, PaginationRequest? pagination = null)
     {
-        var orders = await _orderRepo.GetUserOrdersAsync(userId);
-        return orders.Select(MapToResponse);
+        var p = pagination ?? new PaginationRequest();
+        var result = await _orderRepo.GetUserOrdersAsync(userId, p);
+        return new PagedResult<OrderResponse>
+        {
+            Items = result.Items.Select(MapToResponse).ToList(),
+            TotalCount = result.TotalCount,
+            Page = result.Page,
+            PageSize = result.PageSize
+        };
     }
 
     public async Task<IEnumerable<OrderResponse>> GetSellerOrdersAsync(int sellerId)
@@ -115,6 +116,15 @@ public class OrderManager : IOrderManager
         order.Status = status;
         order.UpdatedAt = DateTime.UtcNow;
         await _orderRepo.UpdateAsync(order);
+
+        if (status == CustomerOrderStatus.Delivered)
+        {
+            foreach (var sellerId in order.OrderItems.Select(oi => oi.SellerId).Distinct())
+                await _sellerProfileRepo.IncrementSalesAsync(sellerId);
+        }
+
+        await _notificationManager.CreateAsync(order.BuyerId, "Order Updated",
+            $"Your order #{order.Id} status changed to {status}.");
 
         _logger.LogInformation("Order {OrderId} status updated to {Status}", orderId, status);
         return MapToResponse(order);

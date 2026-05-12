@@ -1,5 +1,4 @@
 using Microsoft.Extensions.Logging;
-using Sayiad.Domain.Contracts;
 using Sayiad.Domain.Dtos.UserDtos;
 
 namespace Sayiad.Domain.Managers;

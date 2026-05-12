@@ -1,7 +1,6 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Sayiad.Domain.Contracts;
 using Sayiad.Domain.Dtos.ReviewDtos;
 
 namespace Sayiad.Api.Controllers;

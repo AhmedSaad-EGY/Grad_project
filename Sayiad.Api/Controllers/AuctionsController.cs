@@ -1,8 +1,6 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Sayiad.Domain.Enums;
-using Sayiad.Domain.Contracts;
 using Sayiad.Domain.Dtos.AuctionDtos;
 
 namespace Sayiad.Api.Controllers;
@@ -19,9 +17,9 @@ public class AuctionsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetActive()
+    public async Task<IActionResult> GetActive([FromQuery] AuctionFilterRequest? filter, [FromQuery] PaginationRequest? pagination)
     {
-        var auctions = await _auctionManager.GetActiveAsync();
+        var auctions = await _auctionManager.GetActiveAsync(filter, pagination);
         return Ok(auctions);
     }
 
@@ -32,7 +30,7 @@ public class AuctionsController : ControllerBase
         return Ok(auction);
     }
 
-    [Authorize(Roles = nameof(UserRole.Auctioneer))]
+    [Authorize(Roles = $"{nameof(UserRole.Auctioneer)},{nameof(UserRole.Fisherman)},{nameof(UserRole.BaitSeller)}")]
     [HttpPost]
     public async Task<IActionResult> Create(CreateAuctionRequest request)
     {
@@ -50,11 +48,12 @@ public class AuctionsController : ControllerBase
         return Created("", bid);
     }
 
-    [Authorize(Roles = nameof(UserRole.Auctioneer))]
+    [Authorize(Roles = $"{nameof(UserRole.Auctioneer)},{nameof(UserRole.Fisherman)},{nameof(UserRole.BaitSeller)}")]
     [HttpPost("{id}/end")]
     public async Task<IActionResult> EndAuction(int id)
     {
-        var auction = await _auctionManager.EndAuctionAsync(id);
+        var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var auction = await _auctionManager.EndAuctionAsync(id, userId);
         return Ok(auction);
     }
 }

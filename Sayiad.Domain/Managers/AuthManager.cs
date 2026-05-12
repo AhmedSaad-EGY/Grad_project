@@ -1,7 +1,4 @@
 using Microsoft.Extensions.Logging;
-using Sayiad.Domain.Contracts;
-using Sayiad.Domain.Enums;
-using Sayiad.Domain.Models;
 using Sayiad.Domain.Dtos.AuthDtos;
 
 namespace Sayiad.Domain.Managers;
@@ -24,6 +21,9 @@ public class AuthManager : IAuthManager
 
     public async Task<AuthResponse> RegisterAsync(RegisterRequest request)
     {
+        if (request.Role == nameof(UserRole.Admin))
+            throw new UnauthorizedAccessException("Admin accounts cannot be self-registered.");
+
         if (await _userRepo.EmailExistsAsync(request.Email))
             throw new InvalidOperationException("Email already registered");
 
@@ -66,6 +66,18 @@ public class AuthManager : IAuthManager
 
         _logger.LogInformation("Token refreshed for user: {Email}", user.Email);
         return await GenerateAuthResponse(user);
+    }
+
+    public async Task LogoutAsync(int userId)
+    {
+        var user = await _userRepo.GetByIdAsync(userId)
+            ?? throw new KeyNotFoundException("User not found");
+
+        user.RefreshToken = null;
+        user.RefreshTokenExpiry = null;
+        await _userRepo.UpdateAsync(user);
+
+        _logger.LogInformation("User logged out: {UserId}", userId);
     }
 
     public async Task ChangePasswordAsync(int userId, string currentPassword, string newPassword)

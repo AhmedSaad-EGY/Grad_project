@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Sayiad.Domain.Contracts;
 using Sayiad.Domain.Dtos.CategoryDtos;
 
 namespace Sayiad.Api.Controllers;

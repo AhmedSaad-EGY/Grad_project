@@ -1,5 +1,4 @@
 using Microsoft.Extensions.Logging;
-using Sayiad.Domain.Contracts;
 using Sayiad.Domain.Dtos.ReviewDtos;
 
 namespace Sayiad.Domain.Managers;
@@ -8,12 +7,16 @@ public class ReviewManager : IReviewManager
 {
     private readonly IReviewRepository _reviewRepo;
     private readonly IProductRepository _productRepo;
+    private readonly ISellerProfileRepository _sellerProfileRepo;
+    private readonly INotificationManager _notificationManager;
     private readonly ILogger<ReviewManager> _logger;
 
-    public ReviewManager(IReviewRepository reviewRepo, IProductRepository productRepo, ILogger<ReviewManager> logger)
+    public ReviewManager(IReviewRepository reviewRepo, IProductRepository productRepo, ISellerProfileRepository sellerProfileRepo, INotificationManager notificationManager, ILogger<ReviewManager> logger)
     {
         _reviewRepo = reviewRepo;
         _productRepo = productRepo;
+        _sellerProfileRepo = sellerProfileRepo;
+        _notificationManager = notificationManager;
         _logger = logger;
     }
 
@@ -61,6 +64,14 @@ public class ReviewManager : IReviewManager
 
         var savedReview = await _reviewRepo.GetByIdAsync(review.Id)
             ?? throw new KeyNotFoundException("Review not found");
+
+        var product = await _productRepo.GetByIdAsync(request.ProductId);
+        if (product != null)
+        {
+            await _sellerProfileRepo.UpdateRatingAsync(product.SellerId);
+            await _notificationManager.CreateAsync(product.SellerId, "New Review",
+                $"Your product received a new {request.Rating}-star review.");
+        }
 
         return new ReviewResponse(
             savedReview.Id, savedReview.ProductId, savedReview.UserId, savedReview.User.FullName,

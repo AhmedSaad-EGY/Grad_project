@@ -1,12 +1,3 @@
-using System.Text;
-using FluentValidation;
-using FluentValidation.AspNetCore;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using Serilog;
-using Sayiad.Data.Data;
-using Sayiad.Domain.Validators;
-
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
     .CreateBootstrapLogger();
@@ -69,6 +60,10 @@ try
     builder.Services.AddScoped<IAuctionManager, AuctionManager>();
     builder.Services.AddScoped<IReportRepository, ReportRepository>();
     builder.Services.AddScoped<IReportManager, ReportManager>();
+    builder.Services.AddScoped<IShippingAddressRepository, ShippingAddressRepository>();
+    builder.Services.AddScoped<IShippingAddressManager, ShippingAddressManager>();
+    builder.Services.AddScoped<ISellerProfileRepository, SellerProfileRepository>();
+    builder.Services.AddScoped<ISellerProfileManager, SellerProfileManager>();
     builder.Services.AddScoped<IUserRepository, UserRepository>();
     builder.Services.AddScoped<ITokenService, TokenService>();
     builder.Services.AddScoped<IAuthManager, AuthManager>();
@@ -84,12 +79,13 @@ try
     app.UseSerilogRequestLogging();
     app.UseMiddleware<Sayiad.Api.Middleware.ExceptionMiddleware>();
 
-    if (app.Environment.IsDevelopment())
-    {
+    //if (app.Environment.IsDevelopment())
+    //{
         app.UseSwagger();
         app.UseSwaggerUI();
-    }
+    //}
 
+    app.UseStaticFiles();
     app.UseHttpsRedirection();
     app.UseAuthentication();
     app.UseAuthorization();

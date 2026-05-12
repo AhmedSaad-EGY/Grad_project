@@ -1,5 +1,5 @@
 using Microsoft.Extensions.Logging;
-using Sayiad.Domain.Contracts;
+using Sayiad.Data.Common;
 using Sayiad.Domain.Dtos.ProductDtos;
 
 namespace Sayiad.Domain.Managers;
@@ -20,11 +20,18 @@ public class ProductManager : IProductManager
         _logger = logger;
     }
 
-    public async Task<IEnumerable<ProductResponse>> GetAllAsync(ProductFilterRequest? filter = null)
+    public async Task<PagedResult<ProductResponse>> GetAllAsync(ProductFilterRequest? filter = null, PaginationRequest? pagination = null)
     {
         var f = filter ?? new ProductFilterRequest(null, null, null, null, null, null);
-        var products = await _repo.GetAllAsync(f);
-        return products.Select(MapToResponse);
+        var p = pagination ?? new PaginationRequest();
+        var result = await _repo.GetAllAsync(f, p);
+        return new PagedResult<ProductResponse>
+        {
+            Items = result.Items.Select(MapToResponse).ToList(),
+            TotalCount = result.TotalCount,
+            Page = result.Page,
+            PageSize = result.PageSize
+        };
     }
 
     public async Task<ProductResponse> GetByIdAsync(int id)

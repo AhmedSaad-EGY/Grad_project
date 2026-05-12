@@ -1,7 +1,6 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Sayiad.Domain.Contracts;
 using Sayiad.Domain.Dtos.ProductDtos;
 
 namespace Sayiad.Api.Controllers;
@@ -18,9 +17,9 @@ public class ProductsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAll([FromQuery] ProductFilterRequest? filter)
+    public async Task<IActionResult> GetAll([FromQuery] ProductFilterRequest? filter, [FromQuery] PaginationRequest? pagination)
     {
-        var products = await _productManager.GetAllAsync(filter);
+        var products = await _productManager.GetAllAsync(filter, pagination);
         return Ok(products);
     }
 

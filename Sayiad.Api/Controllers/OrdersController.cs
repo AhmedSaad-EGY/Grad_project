@@ -1,8 +1,6 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Sayiad.Domain.Enums;
-using Sayiad.Domain.Contracts;
 using Sayiad.Domain.Dtos.OrderDtos;
 
 namespace Sayiad.Api.Controllers;
@@ -28,10 +26,10 @@ public class OrdersController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetMyOrders()
+    public async Task<IActionResult> GetMyOrders([FromQuery] PaginationRequest? pagination)
     {
         var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-        var orders = await _orderManager.GetUserOrdersAsync(userId);
+        var orders = await _orderManager.GetUserOrdersAsync(userId, pagination);
         return Ok(orders);
     }
 

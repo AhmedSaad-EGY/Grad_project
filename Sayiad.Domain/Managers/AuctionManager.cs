@@ -1,8 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Sayiad.Domain.Contracts;
-using Sayiad.Domain.Enums;
-using Sayiad.Domain.Models;
+using Sayiad.Data.Common;
 using Sayiad.Domain.Dtos.AuctionDtos;
 
 namespace Sayiad.Domain.Managers;
@@ -11,22 +9,33 @@ public class AuctionManager : IAuctionManager
 {
     private readonly IAuctionRepository _auctionRepo;
     private readonly IProductRepository _productRepo;
+    private readonly INotificationManager _notificationManager;
     private readonly ILogger<AuctionManager> _logger;
 
     public AuctionManager(
         IAuctionRepository auctionRepo,
         IProductRepository productRepo,
+        INotificationManager notificationManager,
         ILogger<AuctionManager> logger)
     {
         _auctionRepo = auctionRepo;
         _productRepo = productRepo;
+        _notificationManager = notificationManager;
         _logger = logger;
     }
 
-    public async Task<IEnumerable<AuctionResponse>> GetActiveAsync()
+    public async Task<PagedResult<AuctionResponse>> GetActiveAsync(AuctionFilterRequest? filter = null, PaginationRequest? pagination = null)
     {
-        var auctions = await _auctionRepo.GetActiveAsync();
-        return auctions.Select(MapToResponse);
+        var f = filter ?? new AuctionFilterRequest();
+        var p = pagination ?? new PaginationRequest();
+        var result = await _auctionRepo.GetActiveAsync(f, p);
+        return new PagedResult<AuctionResponse>
+        {
+            Items = result.Items.Select(MapToResponse).ToList(),
+            TotalCount = result.TotalCount,
+            Page = result.Page,
+            PageSize = result.PageSize
+        };
     }
 
     public async Task<AuctionDetailResponse> GetByIdAsync(int auctionId)
@@ -55,6 +64,7 @@ public class AuctionManager : IAuctionManager
         var auction = new Auction
         {
             ProductId = request.ProductId,
+            CreatedByUserId = userId,
             StartTime = DateTime.UtcNow,
             EndTime = request.EndTime,
             StartingPrice = request.StartingPrice,
@@ -119,6 +129,11 @@ public class AuctionManager : IAuctionManager
             throw new InvalidOperationException("Auction has ended");
         }
 
+        var previousWinnerId = auction.Bids
+            .Where(b => b.BidStatus == BidStatus.Winning)
+            .Select(b => (int?)b.UserId)
+            .FirstOrDefault();
+
         foreach (var prevBid in auction.Bids.Where(b => b.BidStatus == BidStatus.Winning))
         {
             prevBid.BidStatus = BidStatus.Valid;
@@ -139,6 +154,12 @@ public class AuctionManager : IAuctionManager
 
         await _auctionRepo.SaveChangesAsync();
 
+        if (previousWinnerId.HasValue && previousWinnerId.Value != userId)
+        {
+            await _notificationManager.CreateAsync(previousWinnerId.Value, "Outbid",
+                $"You have been outbid on auction #{auctionId}.");
+        }
+
         _logger.LogInformation("Bid placed: {BidAmount} on auction {AuctionId} by user {UserId}",
             amount, auctionId, userId);
 
@@ -147,10 +168,13 @@ public class AuctionManager : IAuctionManager
             bid.IsAutoBid, bid.BidStatus.ToString(), bid.CreatedAt);
     }
 
-    public async Task<AuctionResponse> EndAuctionAsync(int auctionId)
+    public async Task<AuctionResponse> EndAuctionAsync(int auctionId, int userId)
     {
         var auction = await _auctionRepo.GetByIdWithDetailsAsync(auctionId)
             ?? throw new KeyNotFoundException("Auction not found");
+
+        if (auction.CreatedByUserId != userId)
+            throw new UnauthorizedAccessException("You can only end your own auctions.");
 
         if (auction.Status != AuctionStatus.Active)
             throw new InvalidOperationException("Auction is already finished or cancelled");
@@ -172,6 +196,19 @@ public class AuctionManager : IAuctionManager
         }
 
         await _auctionRepo.SaveChangesAsync();
+
+        if (auction.WinnerUserId.HasValue)
+        {
+            await _notificationManager.CreateAsync(auction.WinnerUserId.Value, "Auction Won",
+                $"You won auction #{auctionId}!");
+        }
+
+        if (auction.Product != null)
+        {
+            var winningAmount = winningBid?.Amount ?? 0;
+            await _notificationManager.CreateAsync(auction.Product.SellerId, "Auction Ended",
+                $"Your auction for '{auction.Product.Title}' has ended. Winning bid: {winningAmount} EGP.");
+        }
 
         _logger.LogInformation("Auction ended: {AuctionId}, winner: {WinnerId}",
             auctionId, auction.WinnerUserId);
